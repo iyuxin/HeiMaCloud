@@ -101,4 +101,12 @@ class UserMapperTest {
         List<User> users = userMapper.selectList(wrapper);
         users.forEach(System.out::println);
     }
+
+    @Test
+    void testCustomeSqlUpdate(){
+        List<Long> ids = Collections.unmodifiableList(Arrays.asList(1L, 2L, 4L));
+        int amount = 200;
+        QueryWrapper<User> wrapper = new QueryWrapper<User>().in("id", ids);
+        userMapper.updateBalanceByIds(wrapper, amount);
+    }
 }

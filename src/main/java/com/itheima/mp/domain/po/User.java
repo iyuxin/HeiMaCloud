@@ -14,7 +14,6 @@ public class User {
     /**
      * 用户id
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
