@@ -11,5 +11,24 @@ logging:
     dateformat: HH:mm:ss
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
-
+mybatis-plus:
+  type-aliases-package: com.itheima.mp.domain.po
+  global-config:
+    db-config:
+      id-type: auto
+knife4j:
+  enable: true
+  openapi:
+    title: 用户管理接口文档
+    description: "用户管理接口文档"
+    email: zhanghuyi@itcast.cn
+    concat: 虎哥
+    url: https://www.itcast.cn
+    version: v1.0.0
+    group:
+      default:
+        group-name: default
+        api-rule: package
+        api-rule-resources:
+          - com.itheima.mp.controller
 
