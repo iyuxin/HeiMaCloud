@@ -43,10 +43,18 @@ public class UserController {
     }
 
     @ApiOperation(value = "批量查询用户接口")
-    @GetMapping("/{id}")
+    @GetMapping
     public List<UserVO> queryById(@ApiParam("用户id集合") @RequestParam("ids") List<Long> ids) {
         List<User> users = userService.listByIds(ids);
         return BeanUtil.copyToList(users, UserVO.class);
+    }
+
+    @ApiOperation(value = "扣减用户余额接口")
+    @PutMapping("/{id}/deduction/{money}")
+    public void deductBalance(
+            @ApiParam("用户id") @PathVariable("id") Long id,
+            @ApiParam("扣减的金额") @PathVariable("money") Integer money) {
+        userService.deductBalance(id, money);
     }
 
 }

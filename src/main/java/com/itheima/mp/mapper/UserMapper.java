@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.itheima.mp.domain.po.User;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
+import org.apache.ibatis.annotations.Update;
 
 public interface UserMapper extends BaseMapper<User> {
 
 
     void updateBalanceByIds(@Param("ew") QueryWrapper<User> wrapper, @Param("amount") int amount);
+
+    @Update("UPDATE tb_user SET balance = balance - #{money} WHERE id = #{id}")
+    void deductBalance(@Param("id")Long id, @Param("money")Integer money);
 }
