@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/mp?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://127.0.0.1:3306/mp?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatemments=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 1234
@@ -9,8 +9,8 @@ logging:
     com.itheima: debug
   pattern:
     dateformat: HH:mm:ss
-mybatis:
-  mapper-locations: classpath*:mapper/*.xml
+#mybatis:
+#  mapper-locations: classpath*:mapper/*.xml
 mybatis-plus:
   type-aliases-package: com.itheima.mp.domain.po
   global-config:
