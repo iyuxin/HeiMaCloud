@@ -39,15 +39,14 @@ public class UserController {
     @ApiOperation(value = "查询用户接口")
     @GetMapping("/{id}")
     public UserVO queryById(@ApiParam("用户id") @PathVariable("id") Long id) {
-        User user = userService.getById(id);
-        return BeanUtil.copyProperties(user, UserVO.class);
+        return userService.queryUserAndAddressesById(id);
     }
 
     @ApiOperation(value = "批量查询用户接口")
     @GetMapping
     public List<UserVO> queryById(@ApiParam("用户id集合") @RequestParam("ids") List<Long> ids) {
-        List<User> users = userService.listByIds(ids);
-        return BeanUtil.copyToList(users, UserVO.class);
+
+        return userService.queryUserAndAddressesByIds(ids);
     }
 
     @ApiOperation(value = "扣减用户余额接口")
