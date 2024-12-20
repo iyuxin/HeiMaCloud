@@ -2,7 +2,6 @@ package com.itheima.mp.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
@@ -14,7 +13,9 @@ import com.itheima.mp.domain.vo.AddressVO;
 import com.itheima.mp.domain.vo.UserVO;
 import com.itheima.mp.enums.UserStatus;
 import com.itheima.mp.mapper.UserMapper;
+import com.itheima.mp.service.IAddressService;
 import com.itheima.mp.service.IUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,12 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
+
+
+    @Autowired
+    private IAddressService addressService;
+
+
     @Override
     @Transactional
     public void deductBalance(Long id, Integer money) {
@@ -104,26 +111,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return userVOS;
     }
 
-        @Override
+    @Override
     public PageDTO<UserVO> queryUsersPages(UserQuery userQuery) {
         // 获取用户查询条件中的用户名
         String name = userQuery.getName();
         // 获取用户查询条件中的用户状态
         Integer status = userQuery.getStatus();
 
-        // 创建分页对象，传入当前页码和每页显示的记录数
-        Page<User> page = Page.of(userQuery.getPageNo(), userQuery.getPageSize());
+        Page<User> page = userQuery.toMpPageDefaultSortByUpdateTime();
 
-        // 如果用户查询条件中指定了排序字段
-        if (userQuery.getOrderBy() != null) {
-            // 添加排序条件，传入排序字段和排序方式（升序或降序）
-            page.addOrder(new OrderItem(userQuery.getOrderBy(), userQuery.getIsAsc()));
-        } else {
-            // 如果未指定排序字段，则默认按更新时间降序排序
-            page.addOrder(new OrderItem("update_time", false));
-        }
-
-        // 使用Lambda表达式构建查询条件
+            // 使用Lambda表达式构建查询条件
         Page<User> p = lambdaQuery()
                 // 如果用户名不为空，则添加模糊查询条件
                 .like(name != null, User::getUsername, name)
@@ -133,18 +130,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .page(page);
 
         // 创建分页数据传输对象
-        PageDTO<UserVO> dto = new PageDTO<>();
-        // 设置总记录数
-        dto.setTotal(p.getTotal());
-        // 设置总页数
-        dto.setPages(p.getPages());
-        // 如果查询结果为空，则设置列表为空列表
-        if (CollUtil.isEmpty(p.getRecords())) {
-            dto.setList(Collections.emptyList());
-        } else {
-            // 否则，将查询结果转换为UserVO对象列表
-            dto.setList(BeanUtil.copyToList(p.getRecords(), UserVO.class));
-        }
+        PageDTO<UserVO> dto = PageDTO.of(p, user -> {
+            UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
+
+            vo.setUsername(vo.getUsername().substring(0,vo.getUsername().length()-2)+"**");
+            try {
+                vo.setAddresses(addressService.queryAddressById(vo.getId()));
+            }catch (RuntimeException e){
+                vo.setAddresses(Collections.emptyList());
+            }
+            return vo;
+        });
         // 返回分页数据传输对象
         return dto;
     }
