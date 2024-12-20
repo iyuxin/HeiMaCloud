@@ -2,10 +2,14 @@ package com.itheima.mp.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
+import com.itheima.mp.domain.dto.PageDTO;
 import com.itheima.mp.domain.po.Address;
 import com.itheima.mp.domain.po.User;
+import com.itheima.mp.domain.query.UserQuery;
 import com.itheima.mp.domain.vo.AddressVO;
 import com.itheima.mp.domain.vo.UserVO;
 import com.itheima.mp.enums.UserStatus;
@@ -98,6 +102,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             }
         }
         return userVOS;
+    }
+
+        @Override
+    public PageDTO<UserVO> queryUsersPages(UserQuery userQuery) {
+        // 获取用户查询条件中的用户名
+        String name = userQuery.getName();
+        // 获取用户查询条件中的用户状态
+        Integer status = userQuery.getStatus();
+
+        // 创建分页对象，传入当前页码和每页显示的记录数
+        Page<User> page = Page.of(userQuery.getPageNo(), userQuery.getPageSize());
+
+        // 如果用户查询条件中指定了排序字段
+        if (userQuery.getOrderBy() != null) {
+            // 添加排序条件，传入排序字段和排序方式（升序或降序）
+            page.addOrder(new OrderItem(userQuery.getOrderBy(), userQuery.getIsAsc()));
+        } else {
+            // 如果未指定排序字段，则默认按更新时间降序排序
+            page.addOrder(new OrderItem("update_time", false));
+        }
+
+        // 使用Lambda表达式构建查询条件
+        Page<User> p = lambdaQuery()
+                // 如果用户名不为空，则添加模糊查询条件
+                .like(name != null, User::getUsername, name)
+                // 如果用户状态不为空，则添加等于查询条件
+                .eq(status != null, User::getStatus, status)
+                // 执行分页查询
+                .page(page);
+
+        // 创建分页数据传输对象
+        PageDTO<UserVO> dto = new PageDTO<>();
+        // 设置总记录数
+        dto.setTotal(p.getTotal());
+        // 设置总页数
+        dto.setPages(p.getPages());
+        // 如果查询结果为空，则设置列表为空列表
+        if (CollUtil.isEmpty(p.getRecords())) {
+            dto.setList(Collections.emptyList());
+        } else {
+            // 否则，将查询结果转换为UserVO对象列表
+            dto.setList(BeanUtil.copyToList(p.getRecords(), UserVO.class));
+        }
+        // 返回分页数据传输对象
+        return dto;
     }
 
 

@@ -1,6 +1,7 @@
 package com.itheima.mp.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.itheima.mp.domain.dto.PageDTO;
 import com.itheima.mp.domain.dto.UserFormDTO;
 import com.itheima.mp.domain.po.User;
 import com.itheima.mp.domain.query.UserQuery;
@@ -62,6 +63,12 @@ public class UserController {
     public List<UserVO> queryUsers(UserQuery userQuery) {
         List<User> users = userService.queryUsers(userQuery.getName(), userQuery.getStatus(), userQuery.getMinBalance(), userQuery.getMaxBalance());
         return BeanUtil.copyToList(users, UserVO.class);
+    }
+
+    @ApiOperation(value = "根据分页条件查询用户接口")
+    @GetMapping("/page")
+    public PageDTO<UserVO> queryUsersPages(UserQuery userQuery) {
+        return userService.queryUsersPages(userQuery);
     }
 
 }
